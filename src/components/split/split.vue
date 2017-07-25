@@ -6,7 +6,7 @@
   export default {};
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus" type="text/stylus">
+<style lang="stylus" rel="stylesheet/stylus">
   .split
     width: 100%
     height: 16px

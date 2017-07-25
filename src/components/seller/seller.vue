@@ -1,6 +1,6 @@
 <template>
-  <div class="seller" v-el:seller>
-    <div class="seller-contnet">
+  <div class="seller" ref="seller">
+    <div class="seller-content">
       <div class="overview">
         <h1 class="title">{{seller.name}}</h1>
         <div class="desc border-1px">
@@ -40,17 +40,17 @@
           <p class="content">{{seller.bulletin}}</p>
         </div>
         <ul v-if="seller.supports" class="supports">
-          <li class="support-item border-1px" v-for="item in seller.supports">
-            <span class="icon" :class="classMap[seller.supports[$index].type]"></span>
-            <span class="text">{{seller.supports[$index].description}}</span>
+          <li class="support-item border-1px" v-for="(item,index) in seller.supports">
+            <span class="icon" :class="classMap[seller.supports[index].type]"></span>
+            <span class="text">{{seller.supports[index].description}}</span>
           </li>
         </ul>
       </div>
       <split></split>
       <div class="pics">
         <h1 class="title">商家实景</h1>
-        <div class="pic-wrapper" v-el:pic-wrapper>
-          <ul class="pic-list" v-el:pic-list>
+        <div class="pic-wrapper" ref="picWrapper">
+          <ul class="pic-list" ref="picList">
             <li class="pic-item" v-for="pic in seller.pics">
               <img :src="pic" width="120" height="90">
             </li>
@@ -69,12 +69,12 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import star from 'components/star/star';
-  import {saveToLocal, loadFromLocal} from 'common/js/store';
   import BScroll from 'better-scroll';
+  import {saveToLocal, loadFromLocal} from 'common/js/store';
+  import star from 'components/star/star';
   import split from 'components/split/split';
 
-  export default{
+  export default {
     props: {
       seller: {
         type: Object
@@ -92,18 +92,22 @@
         return this.favorite ? '已收藏' : '收藏';
       }
     },
-    watch: {
-      'seller'() {
-        this._initScroll();
-        this._initPics();
-      }
-    },
     created() {
       this.classMap = ['decrease', 'discount', 'special', 'invoice', 'guarantee'];
     },
-    ready() {
-      this._initScroll();
-      this._initPics();
+    watch: {
+      'seller'() {
+        this.$nextTick(() => {
+          this._initScroll();
+          this._initPics();
+        });
+      }
+    },
+    mounted() {
+      this.$nextTick(() => {
+        this._initScroll();
+        this._initPics();
+      });
     },
     methods: {
       toggleFavorite(event) {
@@ -115,7 +119,7 @@
       },
       _initScroll() {
         if (!this.scroll) {
-          this.scroll = new BScroll(this.$els.seller, {
+          this.scroll = new BScroll(this.$refs.seller, {
             click: true
           });
         } else {
@@ -127,10 +131,10 @@
           let picWidth = 120;
           let margin = 6;
           let width = (picWidth + margin) * this.seller.pics.length - margin;
-          this.$els.picList.style.width = width + 'px ';
+          this.$refs.picList.style.width = width + 'px';
           this.$nextTick(() => {
             if (!this.picScroll) {
-              this.picScroll = new BScroll(this.$els.picWrapper, {
+              this.picScroll = new BScroll(this.$refs.picWrapper, {
                 scrollX: true,
                 eventPassthrough: 'vertical'
               });
@@ -143,25 +147,24 @@
     },
     components: {
       star,
-      BScroll,
       split
     }
   };
 </script>
 
-<style lang="stylus" rel="stylesheet/stylus" type="text/stylus">
+<style lang="stylus" rel="stylesheet/stylus">
   @import "../../common/stylus/mixin.styl"
 
   .seller
     position: absolute
     top: 174px
-    bottom: 0px
+    bottom: 0
+    left: 0
     width: 100%
-    left: 0px
     overflow: hidden
     .overview
-      padding: 18px
       position: relative
+      padding: 18px
       .title
         margin-bottom: 8px
         line-height: 14px
@@ -170,7 +173,7 @@
       .desc
         padding-bottom: 18px
         border-1px(rgba(7, 17, 27, 0.1))
-        font-size: 0px
+        font-size: 0
         .star
           display: inline-block
           margin-right: 8px
@@ -195,7 +198,7 @@
             margin-bottom: 4px
             line-height: 10px
             font-size: 10px
-            color: rgb(147, 154, 159)
+            color: rgb(147, 153, 159)
           .content
             line-height: 24px
             font-size: 10px
@@ -229,7 +232,7 @@
         font-size: 14px
       .content-wrapper
         padding: 0 12px 16px 12px
-        border-bottom: 1px solid rgba(7, 17, 27, 0.1)
+        border-1px(rgba(7, 17, 27, 0.1))
         .content
           line-height: 24px
           font-size: 12px
@@ -238,31 +241,31 @@
         .support-item
           padding: 16px 12px
           border-1px(rgba(7, 17, 27, 0.1))
-          font-size: 0px
+          font-size: 0
           &:last-child
             border-none()
-          .icon
-            display: inline-block
-            width: 16px
-            height: 16px
-            vertical-align: top
-            margin-right: 6px
-            background-size: 16px 16px
-            background-repeat: no-repeat
-            &.decrease
-              bg-image('decrease_4')
-            &.discount
-              bg-image('discount_4')
-            &.guarantee
-              bg-image('guarantee_4')
-            &.invoice
-              bg-image('invoice_4')
-            &.special
-              bg-image('special_4')
-          .text
-            line-height: 16px
-            font-size: 12px
-            color: rgb(7, 17, 27)
+        .icon
+          display: inline-block
+          width: 16px
+          height: 16px
+          vertical-align: top
+          margin-right: 6px
+          background-size: 16px 16px
+          background-repeat: no-repeat
+          &.decrease
+            bg-image('decrease_4')
+          &.discount
+            bg-image('discount_4')
+          &.guarantee
+            bg-image('guarantee_4')
+          &.invoice
+            bg-image('invoice_4')
+          &.special
+            bg-image('special_4')
+        .text
+          line-height: 16px
+          font-size: 12px
+          color: rgb(7, 17, 27)
     .pics
       padding: 18px
       .title
@@ -275,7 +278,7 @@
         overflow: hidden
         white-space: nowrap
         .pic-list
-          font-size: 0px
+          font-size: 0
           .pic-item
             display: inline-block
             margin-right: 6px
@@ -298,6 +301,4 @@
         font-size: 12px
         &:last-child
           border-none()
-
-
 </style>
